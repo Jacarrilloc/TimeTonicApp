@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:gravity="center"
-    tools:context=".MainActivity">
+    tools:context=".LoginActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,29 +28,28 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
         android:orientation="vertical"
-        tools:ignore="UselessParent">
+        android:padding="16dp">
 
         <EditText
-            android:id="@+id/emailInputLogin"
+            android:id="@+id/email_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:autofillHints=""
-            android:layout_marginBottom="15sp"
-            android:hint="@string/email"
+            android:hint="Email"
             android:inputType="textEmailAddress" />
 
         <EditText
-            android:id="@+id/passwordInputLogin"
+            android:id="@+id/password_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:autofillHints=""
-            android:hint="@string/password"
+            android:hint="Password"
             android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login" />
     </LinearLayout>
 
 </LinearLayout>
