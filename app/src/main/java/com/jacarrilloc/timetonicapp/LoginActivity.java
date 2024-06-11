@@ -1,6 +1,9 @@
 package com.jacarrilloc.timetonicapp;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -33,15 +36,16 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> {
             String email = emailInput.getText().toString();
-            String password = emailInput.getText().toString();
+            String password = passwordInput.getText().toString();
 
             if (!email.isEmpty() && !password.isEmpty()) {
                 if (NetworkUtil.isNetworkConnected(this)) {
                     authRepository.login(email, password, new AuthRepository.LoginCallback() {
                         @Override
-                        public void onSuccess() {
+                        public void onSuccess(String result) {
                             runOnUiThread(() -> {
                                 Toast.makeText(LoginActivity.this, "Login OK", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "Login result: " + result);
                                 // Intent intent = new Intent(LoginActivity.this, LandingPageActivity.class);
                                 // startActivity(intent);
                             });

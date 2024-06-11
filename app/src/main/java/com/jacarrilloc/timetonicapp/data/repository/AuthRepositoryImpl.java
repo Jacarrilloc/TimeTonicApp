@@ -6,7 +6,14 @@ import androidx.annotation.NonNull;
 
 import com.jacarrilloc.timetonicapp.util.ConfigUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import okhttp3.Call;
@@ -20,19 +27,18 @@ import okhttp3.Response;
 
 public class AuthRepositoryImpl implements AuthRepository {
     private String loginUrl;
-    private String req;
     private String version;
     private String appName;
+    private String email;
+    private String password;
 
     public AuthRepositoryImpl(Context context) {
         Properties properties = ConfigUtil.loadProperties(context);
         loginUrl = properties.getProperty("api_url");
-        req = properties.getProperty("req");
         version = properties.getProperty("version");
         appName = properties.getProperty("appname");
 
-        // Agregar mensajes de depuración para verificar las propiedades cargadas
-        if (loginUrl == null || req == null || version == null || appName == null) {
+        if (loginUrl == null || version == null || appName == null) {
             throw new IllegalStateException("One or more properties are missing in config.properties");
         }
     }
@@ -44,15 +50,18 @@ public class AuthRepositoryImpl implements AuthRepository {
             return;
         }
 
+        this.email = email;
+        this.password = password;
+
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         MediaType mediaType = MediaType.parse("text/plain");
 
         RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("req", req)
-                .addFormDataPart("version", version)
-                .addFormDataPart("appname", appName)
-                .addFormDataPart("email", email)
-                .addFormDataPart("password", password)
+                .addFormDataPart("req", "createAppkey")
+                .addFormDataPart("version", this.version)
+                .addFormDataPart("appname", this.appName)
+                .addFormDataPart("email",  this.email)
+                .addFormDataPart("password", this.password)
                 .build();
 
         Request request = new Request.Builder()
@@ -69,11 +78,53 @@ public class AuthRepositoryImpl implements AuthRepository {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    callback.onSuccess();
+                    String result = response.body().string();
+                    try {
+                        createOauthkey(result, callback);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     callback.onFailure("Login Failed: " + response.message());
                 }
             }
         });
+    }
+
+    private void createOauthkey(String jsonResult, LoginCallback callback) throws JSONException, IOException {
+        Map<String, String> dataResponse = getJsonMap(jsonResult);
+
+        OkHttpClient clientOauthkey = new OkHttpClient()
+                .newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("req", "createOauthkey")
+                .addFormDataPart("version", this.version)
+                .addFormDataPart("appkey", dataResponse.get("appkey"))
+                .addFormDataPart("login", this.email)
+                .addFormDataPart("pwd", this.password)
+                .build();
+
+        Request oAuthRequest = new Request.Builder().url(this.loginUrl)
+                .method("POST", body)
+                .build();
+        Response response = clientOauthkey.newCall(oAuthRequest).execute();
+
+        String responseBody = response.body().string();
+
+        callback.onSuccess(responseBody);
+    }
+
+    private Map<String, String> getJsonMap(String json) throws JSONException {
+        Map<String, String> jsonMap = new HashMap<>();
+        JSONObject jsonObject = new JSONObject(json);
+        Iterator<String> keys = jsonObject.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            String value = jsonObject.getString(key);
+            jsonMap.put(key, value);
+        }
+        return jsonMap;
     }
 }
