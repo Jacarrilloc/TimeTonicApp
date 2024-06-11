@@ -1,6 +1,7 @@
 package com.jacarrilloc.timetonicapp.data.repository;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -113,7 +114,34 @@ public class AuthRepositoryImpl implements AuthRepository {
 
         String responseBody = response.body().string();
 
+        createSesskey(responseBody);
+
         callback.onSuccess(responseBody);
+    }
+
+    private void createSesskey(String jsonData) throws JSONException, IOException {
+        Map<String, String> jsonMapResultOauth = getJsonMap(jsonData);
+
+        OkHttpClient clientSesskey = new OkHttpClient()
+                .newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("req", "createSesskey")
+                .addFormDataPart("version", this.version)
+                .addFormDataPart("oauthkey", jsonMapResultOauth.get("oauthkey"))
+                .addFormDataPart("o_u", jsonMapResultOauth.get("o_u"))
+                .addFormDataPart("u_c", jsonMapResultOauth.get("o_u"))
+                .addFormDataPart("restrictions", "")
+                .build();
+
+        Request sesskeyRequest = new Request.Builder().url(this.loginUrl)
+                .method("POST", body)
+                .build();
+        Response response = clientSesskey.newCall(sesskeyRequest).execute();
+
+        Log.i("FINAL AUTH", response.body().string()); // Final result OK
+
     }
 
     private Map<String, String> getJsonMap(String json) throws JSONException {
