@@ -174,7 +174,7 @@ public class AuthRepositoryImpl implements AuthRepository {
         editor.apply();
     }
 
-    public String getAuthToken () {
+    public static String getAuthToken (Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("token", MODE_PRIVATE);
         return sharedPreferences.getString("token", null);
     }

@@ -2,6 +2,7 @@ package com.jacarrilloc.timetonicapp;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -46,8 +47,8 @@ public class LoginActivity extends AppCompatActivity {
                             runOnUiThread(() -> {
                                 Toast.makeText(LoginActivity.this, "Login OK", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "Login result: " + result);
-                                // Intent intent = new Intent(LoginActivity.this, LandingPageActivity.class);
-                                // startActivity(intent);
+                                Intent intent = new Intent(LoginActivity.this, LandingPage.class);
+                                startActivity(intent);
                             });
                         }
 

@@ -16,6 +16,9 @@
         android:theme="@style/Theme.TimeTonicApp"
         tools:targetApi="31">
         <activity
+            android:name=".LandingPage"
+            android:exported="false" />
+        <activity
             android:name=".LandingPageActivity"
             android:exported="false" />
         <activity
