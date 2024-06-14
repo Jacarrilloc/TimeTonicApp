@@ -1,6 +1,9 @@
 package com.jacarrilloc.timetonicapp.data.repository;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -32,8 +35,10 @@ public class AuthRepositoryImpl implements AuthRepository {
     private String appName;
     private String email;
     private String password;
+    private Context context;
 
     public AuthRepositoryImpl(Context context) {
+        this.context = context;
         Properties properties = ConfigUtil.loadProperties(context);
         loginUrl = properties.getProperty("api_url");
         version = properties.getProperty("version");
@@ -140,7 +145,13 @@ public class AuthRepositoryImpl implements AuthRepository {
                 .build();
         Response response = clientSesskey.newCall(sesskeyRequest).execute();
 
-        Log.i("FINAL AUTH", response.body().string()); // Final result OK
+        String resultFinal = response.body().string();
+
+        Map<String, String> jsonMapResultSesskey = getJsonMap(resultFinal);
+
+        saveAuthToken( jsonMapResultSesskey.get("sesskey")); //saveToken
+
+        Log.i("FINAL AUTH", jsonMapResultSesskey.get("sesskey"));
 
     }
 
@@ -154,5 +165,17 @@ public class AuthRepositoryImpl implements AuthRepository {
             jsonMap.put(key, value);
         }
         return jsonMap;
+    }
+
+    private void saveAuthToken(String token) {
+        SharedPreferences sharedPreferences = this.context.getSharedPreferences("token", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("token", token);
+        editor.apply();
+    }
+
+    public String getAuthToken () {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("token", MODE_PRIVATE);
+        return sharedPreferences.getString("token", null);
     }
 }
